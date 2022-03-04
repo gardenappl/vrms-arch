@@ -181,6 +181,9 @@ FREE_LICENSES = [clean_license_name(license) for license in [
 
 class LicenseFinder(object):
     def __init__(self):
+        # number of packages
+        self.num_pkgs = set()
+
         # all of the seen (clean) license names with counts
         self.by_license = {}
 
@@ -195,6 +198,7 @@ class LicenseFinder(object):
 
     def visit_db(self, db):
         pkgs = db.packages
+        self.num_pkgs = len(db.packages)
 
         free_pkgs = []
 
@@ -254,6 +258,7 @@ class LicenseFinder(object):
         for nfpackage in sorted(self.nonfree_packages, key=lambda pkg: pkg.name):
             print("%s: %s" % (nfpackage.name, nfpackage.licenses))
 
-        print("\nNon-free packages: %d\n" % len(self.nonfree_packages), file=sys.stderr)
+        print("\nNon-free packages: %d (%.2f%% of total)\n" % (len(self.nonfree_packages),
+            ((len(self.nonfree_packages) / float(self.num_pkgs)) * 100)), file=sys.stderr)
 
         print("However, there are %d ambiguously licensed packages that vrms cannot certify." % len(self.unknown_packages), file=sys.stderr)
