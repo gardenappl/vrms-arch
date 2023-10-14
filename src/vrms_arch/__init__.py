@@ -1,11 +1,9 @@
 # If you consider the output of this program to be legal advice,
 # you're insane.
 
+import argparse
 import os
 import os.path
-
-from optparse import OptionParser
-
 import pyalpm
 
 # DFSG/OSI-approved licenses, and the various variants in naming them
@@ -15,36 +13,29 @@ from .license_finder import LicenseFinder
 from .disambiguation import UnambiguousDb
 
 def vrms():
-    parser = OptionParser()
+    parser = argparse.ArgumentParser(description='Virtual Richard M. Stallman for Arch Linux Resources: enumerates non-free packages (that is to say, under licenses not considered by OSI, FSF, and/or the DFSG to be Free Software)')
 
-    parser.add_option("-g", "--global-repos",
-                      dest="use_global_repos",
-                      action="store_true",
-                      default=False,
-                      help="Check licenses in all packages in all synced repositories (might exclude the AUR!), rather than that of locally installed packages")
-    parser.add_option("-a", "--list-licenses",
-                      dest="list_all_licenses",
-                      action="store_true",
-                      default=False,
-                      help="List all licenses")
-    parser.add_option("-e", "--list-ethical",
-                      dest="list_ethical",
-                      action="store_true",
-                      default=False,
-                      help="List only non-free packages with 'ethical source' licenses")
-    parser.add_option("-u", "--list-unknowns",
-                      dest="list_unknowns",
-                      action="store_true",
-                      default=False,
-                      help="List packages of unknown license instead of non-free packages")
+    parser.add_argument("-g", "--global-repos",
+                        action="store_true",
+                        help="Check licenses in all packages in all synced repositories (might exclude the AUR!), rather than that of locally installed packages")
+    parser.add_argument("-a", "--list-licenses",
+                        action="store_true",
+                        help="List all licenses")
+    parser.add_argument("-e", "--list-ethical",
+                        action="store_true",
+                        help="List only non-free packages with 'ethical source' licenses")
+    parser.add_argument("-u", "--list-unknowns",
+                        action="store_true",
+                        help="List packages of unknown license instead of non-free packages")
+    parser.add_argument
 
-    (options, _) = parser.parse_args()
+    args = parser.parse_args()
 
     h = pyalpm.Handle("/", "/var/lib/pacman")
 
     dbs_to_visit = []
 
-    if options.use_global_repos:
+    if args.global_repos:
         for d in set(os.path.splitext(f)[0] for f in os.listdir("/var/lib/pacman/sync")):
             h.register_syncdb(d, 0)
         dbs_to_visit = h.get_syncdbs()
@@ -59,11 +50,11 @@ def vrms():
         db = UnambiguousDb(db)
         visitor.visit_db(db)
 
-    if options.list_unknowns:
+    if args.list_unknowns:
         visitor.list_all_unknown_packages()
-    elif options.list_ethical:
+    elif args.list_ethical:
         visitor.list_all_ethical_packages()
-    elif options.list_all_licenses:
+    elif args.list_licenses:
         visitor.list_all_licenses_as_python()
     else:
         visitor.list_all_nonfree_packages()
