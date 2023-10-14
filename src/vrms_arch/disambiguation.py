@@ -213,5 +213,10 @@ class UnambiguousDb(object):
                 self.packages.append(Package(pkg.name, AMBIGUOUS_PACKAGES[pkg.name]))
             elif pkg.name.startswith("lib32") and pkg.name[6:] in AMBIGUOUS_PACKAGES:
                 self.packages.append(Package(pkg.name, AMBIGUOUS_PACKAGES[pkg.name[6:]]))
+            elif any([' OR ' in l for l in pkg.licenses]):
+                licenses = []
+                for l in pkg.licenses:
+                    licenses.extend(l.split(' OR '))
+                self.packages.append(Package(pkg.name, licenses))
             else:
                 self.packages.append(Package(pkg.name, pkg.licenses))

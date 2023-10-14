@@ -4,7 +4,8 @@ import sys
 
 def clean_license_name(license):
     license = license.lower()
-    license = re.sub('(?:^custom:|[,\s_"-])', '', license)
+    license = re.sub('(?:^custom:|[,\s_"/\(\)\:-])', '', license)
+    license = re.sub('licence', 'license', license)
     return license
 
 AMBIGUOUS_LICENSES = [clean_license_name(license) for license in [
@@ -12,23 +13,22 @@ AMBIGUOUS_LICENSES = [clean_license_name(license) for license in [
     "other",
     "unknown",
     # CCPL (Creative Commons) should be specified with one of the
-    # sublicenses (one of /usr/share/licenses/common/CCPL/*) , some of
+    # sublicenses (one of /usr/share/licenses/common/CCPL/*), some of
     # which are non-free
     "Creative Commons",
-    "CCPL", # ['claws-mail-themes', '0ad', '0ad-data', 'archlinux-lxdm-theme', 'mari0', 'performous-freesongs']
-    "Creative Commons"
+    "CCPL",
 ]]
 
 FREE_LICENSES = [clean_license_name(license) for license in [
     'AFL-3.0',
     'AGPL',
     'AGPL3',
+    'AGPL-3.0-only',
+    'AGPL-3.0-or-later',
     'Apache',
     'Apache2',
-    'Apache-2.0',
     'Apache 2.0',
     'Apache 2.0 with LLVM Exception',
-    'Apache 2.0 with LLVM Execption',
     'Apache License (2.0)',
     'Arphic Public License',
     'Artistic',
@@ -39,10 +39,12 @@ FREE_LICENSES = [clean_license_name(license) for license in [
     'BSD',
     'BSD2',
     'BSD-2-clause',
+    'BSD-2-Clause-Patent',
     'BSD3',
     'BSD-3-clause',
     'BSD License',
     'BSD-like',
+    'BSDL',
     'BSD-style',
     'BSL',
     'bzip2',
@@ -64,8 +66,10 @@ FREE_LICENSES = [clean_license_name(license) for license in [
     'custom:free',
     'dumb',
     'EDL',
+    'EDL-1.0',
     'EPL',
-    'EPL/1.1',
+    'EPL-1.1',
+    'EPL-2.0',
     'etpan',
     'EUPL-1.1',
     'EUPL-1.2',
@@ -79,7 +83,6 @@ FREE_LICENSES = [clean_license_name(license) for license in [
     'font embedding exception',
     'FSFAP',
     'GD',
-    'GFDL-1.3-or-later',
     'GFL',
     'GPL',
     'GPL-1.0-or-later',
@@ -90,8 +93,13 @@ FREE_LICENSES = [clean_license_name(license) for license in [
     'GPL-2.0-only',
     'GPL-2.0-or-later',
     'GPL-2.0-or-later with GCC-exception-2.0 exception',
+    'GPL2-only',
+    'GPL2-or-later',
+    'GPL2 or any later version',
+    'GPL2 with OpenSSL exception',
     'GPL3',
     'GPL-3.0',
+    'GPL-3.0-only',
     'GPL-3.0-or-later',
     'GPL3+GPLv2',
     'GPL3-only',
@@ -118,15 +126,18 @@ FREE_LICENSES = [clean_license_name(license) for license in [
     'LGPL-2.0-or-later',
     'LGPL2.1+',
     'LGPL2.1',
+    'LGPL2_1',
     'LGPL-2.1-only',
     'LGPL-2.1-or-later',
     'LGPL3',
     'LGPLv3+',
     'LGPL-3.0',
+    'LGPL-3.0-only',
     'LGPL-3.0-or-later',
     'libpng',
     'libtiff',
     'libxcomposite',
+    'LLGPL',
     'LPPL',
     'lsof',
     'MirOS',
@@ -153,9 +164,11 @@ FREE_LICENSES = [clean_license_name(license) for license in [
     'PerlArtistic',
     'PerlArtistic2',
     'PHP',
+    'PHP-3.01',
     'pil',
     'PostgreSQL',
     'PSF',
+    'Public',
     'Public Domain',
     'Python',
     'Qhull',
@@ -178,9 +191,13 @@ FREE_LICENSES = [clean_license_name(license) for license in [
     'tcl',
     'TekHVC',
     'TRADEMARKS',
-    'Ubuntu Font Licence 1.0',
+    'Tumbolia',
+    'UBDL',
+    'Ubuntu Font License 1.0',
     'UCD',
+    'UFL-1.0',
     'Unicode-DFS',
+    'University of California and Stanford University License',
     'University of Illinois/NCSA Open Source License',
     'Unlicense',
     'usermin',
@@ -205,23 +222,23 @@ FREE_LICENSES = [clean_license_name(license) for license in [
 # technically not open source but deserve mention
 # see https://ethicalsource.dev/
 ETHICAL_LICENSES = [clean_license_name(license) for license in [
-    'custom:JSON', # "shall be used for Good, not Evil"
-    'custom:ACSL',
-    'custom:Anti-966',
-    'custom:Atmosphere',
-    'custom:CNPL',
-    'custom:Hippocratic',
-    'custom:Hippocratic 2.1',
-    'custom:NoHarm',
-    'custom:NoHarm-draft',
-    'custom:NPL',
-    'custom:PPL',
+    'JSON', # "shall be used for Good, not Evil"
+    'ACSL',
+    'Anti-966',
+    'Atmosphere',
+    'CNPL',
+    'Hippocratic',
+    'Hippocratic 2.1',
+    'NoHarm',
+    'NoHarm-draft',
+    'NPL',
+    'PPL',
 ]]
 
 class LicenseFinder(object):
     def __init__(self):
         # number of packages
-        self.num_pkgs = set()
+        self.num_pkgs = 0
 
         # all of the seen (clean) license names with counts
         self.by_license = {}
@@ -240,7 +257,7 @@ class LicenseFinder(object):
 
     def visit_db(self, db):
         pkgs = db.packages
-        self.num_pkgs = len(db.packages)
+        self.num_pkgs += len(db.packages)
 
         free_pkgs = []
 
@@ -312,7 +329,8 @@ class LicenseFinder(object):
             self.list_all_ethical_packages(sys.stderr)
 
         print("\nThere are %d ambiguously licensed packages that vrms cannot certify." % len(self.unknown_packages), file=sys.stderr)
-        print("Use --list-unknowns to list them (or --help for more info)")
+        print("Use --list-unknowns to list them (or --help for more info)",
+              file=sys.stderr)
 
     def list_all_ethical_packages(self, file=sys.stdout):
         for epackage in sorted(self.ethical_packages, key=lambda pkg: pkg.name):
