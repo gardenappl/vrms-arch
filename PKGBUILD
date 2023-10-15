@@ -5,7 +5,7 @@
 
 pkgname=vrms-arch-git
 _pkgname=vrms-arch
-pkgver=2.0.r0.g86a3195
+pkgver=2.0.1.r3.g79316e8
 pkgrel=1
 pkgdesc="Virtual Richard M. Stallman for Arch Linux (gardenapple's fork)"
 arch=('any')
