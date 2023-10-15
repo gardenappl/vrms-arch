@@ -6,6 +6,7 @@ AMBIGUOUS_PACKAGES = {
     'adobe-source-serif-pro-fonts': ['OFL'],
     'amd-ucode': ['custom:non-free'],
     'aom': ['BSD', 'custom:free'],
+    'apptainer': ['BSD-3-Clause-LBNL'],
     'blas': ['custom:BSD-like'],
     'boost': ['Boost'],
     'boost-libs': ['Boost'],
@@ -17,6 +18,7 @@ AMBIGUOUS_PACKAGES = {
     'cups-filters': ['GPL', 'GPL2', 'GPL3-only', 'GPL3'],
     'db': ['custom:Sleepycat'],
     'discord': ['custom:non-free'],
+    'endless-sky': ['custom:GPL-2.0-or-later', 'custom:GPL-3.0-or-later', 'custom:public-domain', 'custom:CC0', 'custom:CC-BY-2.0', 'custom:CC-BY-3.0', 'custom:CC-BY-4.0', 'custom:CC-BY-SA-3.0', 'custom:CC-BY-SA-4.0'],
     'expat': ['MIT'],
     'file': ['BSD'],
     'flashplugin': ['custom:non-free'],
@@ -131,6 +133,7 @@ AMBIGUOUS_PACKAGES = {
     'spirv-tools': ['Apache'],
     'steam': ['custom:non-free'],
     'sudo': ['ISC', 'BSD3', 'BSD2', 'ZLIB'],
+    'svt-av1': ['BSD-3-Clause'], # additionally 'Alliance for Open Media Patent License 1.0'
     'tcl': ['custom:BSD-like'],
     'tk': ['custom:BSD-like'],
     'ttf-bitstream-vera': ['custom:bitstream-vera'],
@@ -157,6 +160,7 @@ AMBIGUOUS_PACKAGES = {
     'xfce4-wavelan-plugin': ['BSD2'],
     'xfce4-xkb-plugin': ['BSD2'],
     'xkeyboard-config': ['MIT', 'custom:HPND', 'custom:X11', 'custom:MIT-style'],
+    'xcalib': ['GPL-2.0'], # additionally with optional postcardware
     'xorg-bdftopcf': ['custom:X11'],
     'xorg-fonts-encodings': ['custom:Public Domain'],
     'xorg-font-util': ['custom:UCD', 'MIT', 'BSD2'],
@@ -197,6 +201,8 @@ AMBIGUOUS_PACKAGES = {
     'zoom': ['custom:non-free'], # AUR
     'zsh-abbr': ['custom:CC-BY-NC-SA-4.0', 'custom:Hippocratic'], # AUR
     'zsh': ['custom:MIT-style', 'GPL'],
+    'zeroc-ice': ['GPL-2.0-only'], # alternatively non-free commercial license
+    'zeroc-ice-java': ['GPL-2.0-only'], # alternatively non-free commerical license
 }
 
 class Package(object):
