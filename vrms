@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd src/
-python -m vrms_arch
+python -m vrms_arch "$@"
