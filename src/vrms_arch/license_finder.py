@@ -284,11 +284,18 @@ class LicenseFinder(object):
 
         for pkg in pkgs:
             licenses = []
+            clean_licenses = []
 
             # get a list of all licenses on the box
             for license in pkg.licenses:
+                if "AND" in license:
+                    licenses += license.split(" AND ")
+                else:
+                    licenses.append(license)
+
+            for license in licenses:
                 clean_license = clean_license_name(license)
-                licenses.append(clean_license)
+                clean_licenses.append(clean_license)
 
                 if clean_license not in self.by_license:
                     self.by_license[clean_license] = [pkg]
@@ -301,13 +308,13 @@ class LicenseFinder(object):
                     self.license_names[clean_license][license] = 0
                 self.license_names[clean_license][license] += 1
 
-            free_licenses = list(filter(lambda x: x in FREE_LICENSES, licenses))
-            amb_licenses = list(filter(lambda x: x in AMBIGUOUS_LICENSES, licenses))
-            ethical_licenses = list(filter(lambda x: x in ETHICAL_LICENSES, licenses))
+            free_licenses = list(filter(lambda x: x in FREE_LICENSES, clean_licenses))
+            amb_licenses = list(filter(lambda x: x in AMBIGUOUS_LICENSES, clean_licenses))
+            ethical_licenses = list(filter(lambda x: x in ETHICAL_LICENSES, clean_licenses))
 
-            if free_licenses and len(free_licenses) == len(licenses):
+            if free_licenses and len(free_licenses) == len(clean_licenses):
                 free_pkgs.append(pkg)
-            elif len(amb_licenses) > 0 or not licenses:
+            elif len(amb_licenses) > 0 or not clean_licenses:
                 self.unknown_packages.add(pkg)
             else:
                 self.nonfree_packages.add(pkg)
