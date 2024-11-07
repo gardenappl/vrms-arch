@@ -1,9 +1,10 @@
 import json
 import os
-import re
 import sys
 
-from pyparsing import Word, Literal, alphanums, infix_notation, opAssoc, Opt, ParseException, CaselessLiteral, ParseResults
+from pyparsing import Word, Literal, alphanums, infix_notation, opAssoc, Opt, ParseException, CaselessLiteral
+
+from .license_cleaner import clean_license_name
 
 src_dir = os.path.join(os.path.dirname(__file__), "..")
 src_dir = os.path.realpath(src_dir)
@@ -24,12 +25,6 @@ spdx_simple = ((Word(alphanums, alphanums + '-' + '.') + Opt(Literal('+')) +
 spdx_complex = infix_notation(spdx_simple, [ (CaselessLiteral("AND"), 2, opAssoc.LEFT), 
                                              (CaselessLiteral("OR"), 2, opAssoc.LEFT) ])
 
-def clean_license_name(license):
-    license = license.lower()
-    license = re.sub(r'(?:^custom:|[,\s_"/\(\)\:-])', '', license)
-    license = re.sub('licence', 'license', license)
-    return license
-
 
 class LicenseFinder(object):
     def __init__(self):
@@ -48,17 +43,18 @@ class LicenseFinder(object):
         # packages with a known non-free license
         self.nonfree_packages = set()
 
+        print("SPDX list version", SPDX_VERSION, "from", SPDX_DATE, file=sys.stderr)
+
     def visit_db(self, db):
         pkgs = db.packages
         self.num_pkgs += len(db.packages)
-
-        print("SPDX list version", SPDX_VERSION, "from", SPDX_DATE, file=sys.stderr)
 
         for pkg in pkgs:
             try_spdx = False
 
             # get a list of all licenses on the box
             for license in pkg.licenses:
+                print("Clean", clean_license_name(license))
                 if " AND " in license.upper() or " OR " in license.upper() or " WITH " in license.upper():
                     try_spdx = True
                     break
@@ -70,7 +66,7 @@ class LicenseFinder(object):
                     licenses = spdx_complex.parse_string(spdx_expression, parseAll=True)
 
                 except ParseException:
-                    print("Invalid SPDX expression:", spdx_expression, file=sys.stderr)
+                    print(pkg.name, "- Expected SPDX expression but was invalid:", spdx_expression, file=sys.stderr)
 
             # accepts list of licenses, possibly with 'AND', 'OR' and 'WITH' operators and sub-lists
             # if no operators are present, assume AND
@@ -81,26 +77,33 @@ class LicenseFinder(object):
                 found_any_free = False
                 for item in licenses:
                     free = False
-                    if isinstance(item, ParseResults):
+                    if not isinstance(item, str):
                         free = check_license_list(item, free_criteria)
-                    elif item.upper() == "AND" or with_clause:
-                        continue
-                    elif item.upper() == "WITH":
-                        with_clause = True
-                        continue
-                    elif item.upper() == "OR":
-                        and_expression = False
-                        continue
                     else:
-                        free = free_criteria(item)
+                        item_upper = item.upper()
+                        if item_upper == "AND" or with_clause:
+                            continue
+                        elif item_upper == "WITH":
+                            with_clause = True
+                            continue
+                        elif item_upper == "OR":
+                            and_expression = False
+                            continue
+                        else:
+                            free = free_criteria(item)
                     if not free and and_expression:
                         return False
                     elif free:
                         found_any_free = True
                 return found_any_free
-            print("Package:", pkg.name)
-            print("Licenses:", licenses)
-            print("Is OSI?", check_license_list(licenses, lambda item: item in OSI_LICENSES))
+            # print("Package:", pkg.name)
+            # print("Licenses:", licenses)
+            # print("Is OSI?", check_license_list(licenses, lambda item: item in OSI_LICENSES))
+            # print("Is FSF?", check_license_list(licenses, lambda item: item in FSF_LICENSES))
+            # print("Is SPDX?", check_license_list(licenses, lambda item: item in SPDX_LICENSES))
+            check_license_list(licenses, lambda item: item in OSI_LICENSES)
+            check_license_list(licenses, lambda item: item in FSF_LICENSES)
+            check_license_list(licenses, lambda item: item in SPDX_LICENSES)
 
 
     # Print all seen licenses in a convenient almost python list
@@ -133,15 +136,6 @@ class LicenseFinder(object):
         print("\nNon-free packages: %d (%.2f%% of total)\n" % (len(self.nonfree_packages),
             ((len(self.nonfree_packages) / float(self.num_pkgs)) * 100)), file=sys.stderr)
 
-        if self.ethical_packages:
-            self.list_all_ethical_packages(sys.stderr)
-
         print("\nThere are %d ambiguously licensed packages that vrms cannot certify." % len(self.unknown_packages), file=sys.stderr)
         print("Use --list-unknowns to list them (or --help for more info)",
               file=sys.stderr)
-
-    def list_all_ethical_packages(self, file=sys.stdout):
-        for epackage in sorted(self.ethical_packages, key=lambda pkg: pkg.name):
-            print("%s: %s" % (epackage.name, epackage.licenses), file=file)
-
-        print("\nPackages with ethical restrictions: %d" % len(self.ethical_packages), file=sys.stderr)

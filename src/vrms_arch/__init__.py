@@ -21,9 +21,6 @@ def vrms():
     parser.add_argument("-a", "--list-licenses",
                         action="store_true",
                         help="List all licenses")
-    parser.add_argument("-e", "--list-ethical",
-                        action="store_true",
-                        help="List only non-free packages with 'ethical source' licenses")
     parser.add_argument("-u", "--list-unknowns",
                         action="store_true",
                         help="List packages of unknown license instead of non-free packages")
@@ -52,8 +49,6 @@ def vrms():
 
     if args.list_unknowns:
         visitor.list_all_unknown_packages()
-    elif args.list_ethical:
-        visitor.list_all_ethical_packages()
     elif args.list_licenses:
         visitor.list_all_licenses_as_python()
     else:
