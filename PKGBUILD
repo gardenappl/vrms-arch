@@ -12,7 +12,7 @@ arch=('any')
 url="https://github.com/gardenappl/${_pkgname}"
 license=('custom:BSD3')
 makedepends=('git' 'python-build' 'python-installer' 'python-wheel')
-depends=('python' 'pyalpm')
+depends=('python' 'pyalpm' 'python-pyparsing')
 source=("git+https://github.com/gardenappl/${_pkgname}.git")
 sha256sums=('SKIP')
 

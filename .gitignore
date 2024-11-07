@@ -1,5 +1,6 @@
 *~
 __pycache__
+.venv/
 
 # PKGBUILD results and artifacts
 pkg/
@@ -8,3 +9,6 @@ pkg/
 *.egg-info
 dist/
 build/
+
+# Data files
+packages-meta-ext-v1.json*

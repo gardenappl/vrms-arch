@@ -1,260 +1,35 @@
-import pyalpm
+import json
+import os
 import re
 import sys
 
+from pyparsing import Word, Literal, alphanums, infix_notation, opAssoc, Opt, ParseException, CaselessLiteral, ParseResults
+
+src_dir = os.path.join(os.path.dirname(__file__), "..")
+src_dir = os.path.realpath(src_dir)
+
+with open(os.path.join(src_dir, "licenses.json")) as f:
+    spdx_json = json.load(f)
+    global SPDX_LICENSES, OSI_LICENSES, FSF_LICENSES, SPDX_VERSION, SPDX_DATE
+    SPDX_VERSION = spdx_json["licenseListVersion"]
+    SPDX_DATE = spdx_json["releaseDate"]
+    SPDX_LICENSES = [license['licenseId'] for license in spdx_json['licenses']]
+    OSI_LICENSES = [license['licenseId'] for license in spdx_json['licenses'] if license['isOsiApproved']]
+    FSF_LICENSES = [license['licenseId'] for license in spdx_json['licenses'] 
+                    if 'isFsfLibre' in license and license['isFsfLibre']]
+
+
+spdx_simple = ((Word(alphanums, alphanums + '-' + '.') + Opt(Literal('+')) +
+               Opt(Literal('WITH') + Word(alphanums, alphanums + '-' + '.'))))
+spdx_complex = infix_notation(spdx_simple, [ (CaselessLiteral("AND"), 2, opAssoc.LEFT), 
+                                             (CaselessLiteral("OR"), 2, opAssoc.LEFT) ])
+
 def clean_license_name(license):
     license = license.lower()
-    license = re.sub('(?:^custom:|[,\s_"/\(\)\:-])', '', license)
+    license = re.sub(r'(?:^custom:|[,\s_"/\(\)\:-])', '', license)
     license = re.sub('licence', 'license', license)
     return license
 
-AMBIGUOUS_LICENSES = [clean_license_name(license) for license in [
-    "custom",
-    "other",
-    "unknown",
-    # CCPL (Creative Commons) should be specified with one of the
-    # sublicenses (one of /usr/share/licenses/common/CCPL/*), some of
-    # which are non-free
-    "CC",
-    "CCPL",
-    "Creative Commons",
-]]
-
-FREE_LICENSES = [clean_license_name(license) for license in [
-    'AFL-3.0',
-    'AGPL',
-    'AGPL3',
-    'AGPL-3.0-only',
-    'AGPL-3.0-or-later',
-    'Apache',
-    'Apache2',
-    'Apache 2.0',
-    'Apache 2.0 with LLVM Exception',
-    'Apache License (2.0)',
-    'Arphic Public License',
-    'Artistic',
-    'Artistic 2.0',
-    'Beerware',
-    'bitstream-vera',
-    'Boost',
-    '0BSD',
-    'BSD',
-    'BSD2',
-    'BSD-2-Clause',
-    'BSD-2-Clause-Patent',
-    'BSD3',
-    'BSD-3-Clause',
-    'BSD-3-Clause-LBNL',
-    'BSD License',
-    'BSD-like',
-    'BSDL',
-    'BSD-style',
-    'BSL',
-    'bzip2',
-    'CC0',
-    'CC0-1.0',
-    'CC-BY',
-    'CC-BY-2.5',
-    'CC-BY-3.0',
-    'CC-BY-4.0',
-    'CC-BY-SA',
-    'CC-BY-SA-2.5',
-    'CC-BY-SA-3.0',
-    'CC-BY-SA-4.0',
-    'CCPL:by',
-    'CCPL:by-4.0'
-    'CCPL:by-sa',
-    'CCPL:cc-by',
-    'CCPL:cc-by-sa',
-    'CDDL',
-    'CeCILL',
-    'CPL',
-    'Creative Commons, Attribution 3.0 Unported',
-    'custom:free',
-    'dumb',
-    'EDL',
-    'EDL-1.0',
-    'EPL',
-    'EPL-1.1',
-    'EPL-2.0',
-    'etpan',
-    'EUPL-1.1',
-    'EUPL-1.2',
-    'ex',
-    'Expat',
-    'FDL',
-    'FDL1.2',
-    'FDL1.3',
-    'FFSL',
-    'FIPL',
-    'font embedding exception',
-    'Free Public License 1.0.0',
-    'FSFAP',
-    'GD',
-    'GFDL',
-    'GFDL-1.1-no-invariants-or-later',
-    'GFDL-1.2-only',
-    'GFDL-1.2-no-invariants-only',
-    'GFDL-1.3-or-later',
-    'GFL',
-    'GPL',
-    'GPL-1.0-or-later',
-    'GPL2+',
-    'GPL2',
-    'GPL-2.0+',
-    'GPL-2.0',
-    'GPL-2.0-only',
-    'GPL-2.0-or-later',
-    'GPL-2.0-or-later with GCC-exception-2.0 exception',
-    'GPL2-only',
-    'GPL2-or-later',
-    'GPL2 or any later version',
-    'GPL2 with OpenSSL exception',
-    'GPL3',
-    'GPL-3.0',
-    'GPL-3.0-only',
-    'GPL-3.0-or-later',
-    'GPL3+GPLv2',
-    'GPL3-only',
-    'GPL3-or-later',
-    'GPL3 or any later version',
-    'GPL/BSD',
-    'GPL+FE',
-    'GPLv2+',
-    'GPLv2',
-    'GPLv3',
-    'HPND',
-    'IBM Public Licence',
-    'icu',
-    'ImageMagick',
-    'Info-ZIP',
-    'INN',
-    'ISC',
-    'isc-dhcp',
-    'JasPer2.0',
-    'Khronos',
-    'LGPL',
-    'LGPL2',
-    'LGPL-2.0-only',
-    'LGPL-2.0-or-later',
-    'LGPL2.1+',
-    'LGPL2.1',
-    'LGPL2_1',
-    'LGPL-2.1-only',
-    'LGPL-2.1-or-later',
-    'LGPL2.1 with linking exception',
-    'LGPL3',
-    'LGPLv3+',
-    'LGPL-3.0',
-    'LGPL-3.0-only',
-    'LGPL-3.0-or-later',
-    'LGPL-3.0+ with WxWindows-exception-3.1',
-    'LGPL-exception',
-    'libpng',
-    'libtiff',
-    'libxcomposite',
-    'LLGPL',
-    'LPPL',
-    'lsof',
-    'MirOS',
-    'MIT',
-    'MIT-style',
-    'MIT/X',
-    'MITX11',
-    'Modified BSD',
-    'MPL',
-    'MPL2',
-    'MPLv2',
-    'NCSA',
-    'NCSAOSL',
-    'neovim',
-    'nfsidmap',
-    'NoCopyright',
-    'NYSL',
-    'OASIS',
-    'OFL',
-    'OFL-1.1',
-    'OPEN DATA LICENSE',
-    'OpenLDAP',
-    'OpenMPI',
-    'OpenSSL Linking Exception',
-    'OSGPL',
-    'perl',
-    'PerlArtistic',
-    'PerlArtistic2',
-    'PHP',
-    'PHP-3.01',
-    'pil',
-    'PostgreSQL',
-    'PSF',
-    'Public',
-    'public-domain',
-    'Python',
-    'Qhull',
-    'QPL',
-    'QPL-1.0',
-    'qwt',
-    'Ruby',
-    'scite',
-    'scowl',
-    'sdbus-c++ LGPL Exception 1.0',
-    'Sendmail',
-    'Sendmail open source license',
-    'SGI',
-    'SIL',
-    'SIL Open Font License',
-    'SIL Open Font License 1.1 and Bitstream Vera License',
-    'SIL Open Font License, Version 1.0',
-    'SIL OPEN FONT LICENSE Version 1.1',
-    'sip',
-    'Sleepycat',
-    'tcl',
-    'TekHVC',
-    'TRADEMARKS',
-    'Tumbolia',
-    'UBDL',
-    'Ubuntu Font License 1.0',
-    'UCD',
-    'UFL-1.0',
-    'Unicode-DFS',
-    'University of California and Stanford University License',
-    'University of Illinois/NCSA Open Source License',
-    'Unlicense',
-    'usermin',
-    'vim',
-    'voidspace',
-    'W3C',
-    'w3m',
-    'webmin',
-    'WTF',
-    'WTFPL',
-    'wxWindows',
-    'X11',
-    'X11-DEC',
-    'XFREE86',
-    'Xiph',
-    'Zero-Clause BSD',
-    'zlib',
-    'zlib/libpng',
-    'ZPL',
-]]
-
-# Licenses with shared source code but with ethical restrictions -
-# technically not open source but deserve mention
-# see https://ethicalsource.dev/
-ETHICAL_LICENSES = [clean_license_name(license) for license in [
-    'JSON', # "shall be used for Good, not Evil"
-    'ACSL',
-    'Anti-966',
-    'Atmosphere',
-    'CNPL',
-    'Hippocratic',
-    'Hippocratic 2.1',
-    'NoHarm',
-    'NoHarm-draft',
-    'NPL',
-    'PPL',
-]]
 
 class LicenseFinder(object):
     def __init__(self):
@@ -273,54 +48,59 @@ class LicenseFinder(object):
         # packages with a known non-free license
         self.nonfree_packages = set()
 
-        # packages with a known "ethical" license
-        self.ethical_packages = set()
-
     def visit_db(self, db):
         pkgs = db.packages
         self.num_pkgs += len(db.packages)
 
-        free_pkgs = []
+        print("SPDX list version", SPDX_VERSION, "from", SPDX_DATE, file=sys.stderr)
 
         for pkg in pkgs:
-            licenses = []
-            clean_licenses = []
+            try_spdx = False
 
             # get a list of all licenses on the box
             for license in pkg.licenses:
-                if "AND" in license:
-                    licenses += license.split(" AND ")
-                else:
-                    licenses.append(license)
+                if " AND " in license.upper() or " OR " in license.upper() or " WITH " in license.upper():
+                    try_spdx = True
+                    break
 
-            for license in licenses:
-                clean_license = clean_license_name(license)
-                clean_licenses.append(clean_license)
+            licenses = pkg.licenses
+            if try_spdx:
+                spdx_expression = " AND ".join(["({})".format(license) for license in pkg.licenses])
+                try:
+                    licenses = spdx_complex.parse_string(spdx_expression, parseAll=True)
 
-                if clean_license not in self.by_license:
-                    self.by_license[clean_license] = [pkg]
-                else:
-                    self.by_license[clean_license].append(pkg)
+                except ParseException:
+                    print("Invalid SPDX expression:", spdx_expression, file=sys.stderr)
 
-                if clean_license not in self.license_names:
-                    self.license_names[clean_license] = {}
-                if license not in self.license_names[clean_license]:
-                    self.license_names[clean_license][license] = 0
-                self.license_names[clean_license][license] += 1
+            # accepts list of licenses, possibly with 'AND', 'OR' and 'WITH' operators and sub-lists
+            # if no operators are present, assume AND
+            def check_license_list(licenses, free_criteria):
+                and_expression = True
 
-            free_licenses = list(filter(lambda x: x in FREE_LICENSES, clean_licenses))
-            amb_licenses = list(filter(lambda x: x in AMBIGUOUS_LICENSES, clean_licenses))
-            ethical_licenses = list(filter(lambda x: x in ETHICAL_LICENSES, clean_licenses))
-
-            if free_licenses and len(free_licenses) == len(clean_licenses):
-                free_pkgs.append(pkg)
-            elif len(amb_licenses) > 0 or not clean_licenses:
-                self.unknown_packages.add(pkg)
-            else:
-                self.nonfree_packages.add(pkg)
-
-            if len(ethical_licenses) > 0:
-                self.ethical_packages.add(pkg)
+                with_clause = False
+                found_any_free = False
+                for item in licenses:
+                    free = False
+                    if isinstance(item, ParseResults):
+                        free = check_license_list(item, free_criteria)
+                    elif item.upper() == "AND" or with_clause:
+                        continue
+                    elif item.upper() == "WITH":
+                        with_clause = True
+                        continue
+                    elif item.upper() == "OR":
+                        and_expression = False
+                        continue
+                    else:
+                        free = free_criteria(item)
+                    if not free and and_expression:
+                        return False
+                    elif free:
+                        found_any_free = True
+                return found_any_free
+            print("Package:", pkg.name)
+            print("Licenses:", licenses)
+            print("Is OSI?", check_license_list(licenses, lambda item: item in OSI_LICENSES))
 
 
     # Print all seen licenses in a convenient almost python list
