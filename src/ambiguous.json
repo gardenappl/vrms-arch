@@ -1,19 +1,33 @@
 {
   "free": [
     "Apache",
+    "Artistic",
+    "AGPL",
     "BSD",
     "BSD-like",
+    "BSDL",
+    "CCPL",
+    "Creative Commons",
     "GPL",
+    "EUPL",
     "LGPL",
     "MIT-style",
     "MPL",
     "OFL",
+    "OpenLDAP-Public-License",
     "PerlArtistic",
+    "Public",
     "Public Domain",
+    "Python",
+    "PHP",
     "PSF",
-    "SIL"
+    "SIL",
+    "ZPL",
+    "free"
   ],
   "unknown": [
-    "custom"
+    "custom",
+    "unknown",
+    "none"
   ]
 }

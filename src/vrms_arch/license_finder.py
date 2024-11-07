@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-from pyparsing import Word, Literal, alphanums, infix_notation, opAssoc, Opt, ParseException, CaselessLiteral
+from pyparsing import Word, Literal, alphanums, infix_notation, opAssoc, Opt, ParseException, CaselessKeyword, Combine
 
 from .disambiguation import filter_license_name
 
@@ -24,10 +24,10 @@ with open(os.path.join(src_dir, "licenses.json")) as f:
     FILTERED_FSF_LICENSES = list(map(filter_license_name, FSF_LICENSES))
 
 
-spdx_simple = ((Word(alphanums, alphanums + '-' + '.') + Opt(Literal('+')) +
-               Opt(Literal('WITH') + Word(alphanums, alphanums + '-' + '.'))))
-spdx_complex = infix_notation(spdx_simple, [ (CaselessLiteral("AND"), 2, opAssoc.LEFT), 
-                                             (CaselessLiteral("OR"), 2, opAssoc.LEFT) ])
+spdx_simple = (Combine(Word(alphanums, alphanums + '-' + '.') + Opt(Literal('+'))) +
+               Opt(CaselessKeyword('WITH') + Word(alphanums, alphanums + '-' + '.')))
+spdx_complex = infix_notation(spdx_simple, [ (CaselessKeyword("AND"), 2, opAssoc.LEFT), 
+                                             (CaselessKeyword("OR"), 2, opAssoc.LEFT) ])
 
 
 class LicenseFinder(object):
@@ -110,7 +110,7 @@ class LicenseFinder(object):
                 unfree_licenses = list(filter(lambda l: filter_license_name(l) not in FILTERED_SPDX_LICENSES, licenses))
 
             if len(unfree_licenses) > 0:
-                if is_spdx: print(pkg.name, "- not SPDX:", unfree_licenses)
+                # if is_spdx: print(pkg.name, "- not SPDX:", unfree_licenses)
                 self.unknown_packages[pkg.name] = unfree_licenses
 
 
