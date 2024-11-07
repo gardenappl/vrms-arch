@@ -1,223 +1,71 @@
-AMBIGUOUS_PACKAGES = {
-    'acroread-fonts-systemwide': ['custom:non-free'],
-    'adobe-base-14-fonts': ['custom:non-free'],
-    'adobe-source-code-pro-fonts': ['OFL'],
-    'adobe-source-sans-pro-fonts': ['OFL'],
-    'adobe-source-serif-pro-fonts': ['OFL'],
-    'amd-ucode': ['custom:non-free'],
-    'aom': ['BSD', 'custom:free'],
-    'apptainer': ['BSD-3-Clause-LBNL'],
-    'blas': ['custom:BSD-like'],
-    'boost': ['Boost'],
-    'boost-libs': ['Boost'],
-    'broadcom-wl': ['custom:non-free'],
-    'bsd-games': ['BSD'],
-    'bzip2': ['custom:bzip2'],
-    'cblas': ['custom:BSD-like'],
-    'cmake': ['BSD'],
-    'cups-filters': ['GPL', 'GPL2', 'GPL3-only', 'GPL3'],
-    'db': ['custom:Sleepycat'],
-    'discord': ['custom:non-free'],
-    'endless-sky': ['custom:GPL-2.0-or-later', 'custom:GPL-3.0-or-later', 'custom:public-domain', 'custom:CC0', 'custom:CC-BY-2.0', 'custom:CC-BY-3.0', 'custom:CC-BY-4.0', 'custom:CC-BY-SA-3.0', 'custom:CC-BY-SA-4.0'],
-    'expat': ['MIT'],
-    'file': ['BSD'],
-    'flashplugin': ['custom:non-free'],
-    'foldingathome': ['custom:non-free'],
-    'fontconfig': ['custom:HPND'],
-    'gd': ['custom:GD'],
-    'ghc': ['BSD3'],
-    'ghc-libs': ['BSD3'],
-    'hdf5': ['BSD3'],
-    'imagemagick': ['custom:ImageMagick', 'custom:Public Domain', 'MIT'],
-    'intel-ucode': ['custom:non-free'],
-    'ipw2100-fw': ['custom:non-free'],
-    'ipw2200-fw': ['custom:non-free'],
-    'java-openjfx': ['GPL2'],
-    'jdk11-openjdk': ['GPL2'],
-    'jdk8-openjdk': ['GPL2'],
-    'jdk': ['custom:non-free'],
-    'jdk-openjdk': ['GPL2'],
-    'jre11-openjdk': ['GPL2'],
-    'jre11-openjdk-headless': ['GPL2'],
-    'jre8-openjdk': ['GPL2'],
-    'jre8-openjdk-headless': ['GPL2'],
-    'jre': ['custom:non-free'],
-    'jre-openjdk': ['GPL2'],
-    'jre-openjdk-headless': ['GPL2'],
-    'lapack': ['custom:BSD-like'],
-    'lapack-doc': ['custom:BSD-like'],
-    'lapacke': ['custom:BSD-like'],
-    'lib32-sqlite': ['custom:publicdomain'],
-    'libaec': ['BSD2'],
-    'libbsd': ['BSD', 'MIT', 'custom:Public Domain', 'custom:Beerware'],
-    'libdrm': ['MIT'],
-    'libfontenc': ['MIT'],
-    'libice': ['custom:X11'],
-    'libldap': ['custom:OpenLDAP'],
-    'libmagick6': ['custom:ImageMagick', 'custom:Public Domain', 'MIT'],
-    'libmng': ['ZLIB'],
-    'libmodplug': ['custom:publicdomain'],
-    'libpciaccess': ['MIT', 'ISC', 'custom:X11'],
-    'libpng12': ['custom:libpng'],
-    'libpng': ['custom:libpng'],
-    'libsm': ['MIT', 'custom:X11'],
-    'libtiff': ['custom:libtiff'],
-    'libtommath': ['custom:Public Domain'],
-    'libuv': ['MIT', 'BSD2', 'BSD3', 'ISC'],
-    'libva-mesa-driver': ['MIT', 'custom:Khronos', 'custom:SGI'],
-    'libva-utils': ['MIT'],
-    'libvdpau': ['MIT'],
-    'libwpe': ['BSD2'],
-    'libx11': ['MIT', 'custom:X11', 'custom:TekHVC'],
-    'libxau': ['custom:X11'],
-    'libxaw': ['custom:X11', 'custom:HPND', 'MIT'],
-    'libxcb': ['custom:X11'],
-    'libxcomposite': ['custom:libxcomposite', 'MIT'],
-    'libxcursor': ['custom:HPND'],
-    'libxdamage': ['custom:HPND'],
-    'libxdmcp': ['custom:X11'],
-    'libxext': ['custom:X11', 'custom:HPND', 'MIT'],
-    'libxfixes': ['custom:HPND', 'MIT'],
-    'libxfont2': ['MIT', 'custom:HPND', 'BSD2', 'custom:X11'],
-    'libxft': ['custom:HPND'],
-    'libxi': ['custom:X11', 'custom:HPND', 'MIT'],
-    'libxinerama': ['MIT', 'custom:X11'],
-    'libxkbcommon': ['MIT', 'custom:HPND', 'custom:X11'],
-    'libxkbcommon-x11': ['MIT', 'custom:HPND', 'custom:X11'],
-    'libxkbfile': ['custom:HPND', 'custom:X11'],
-    'libxmu': ['custom:X11'],
-    'libxpm': ['custom:X11'],
-    'libxpresent': ['MIT', 'custom:HPND'],
-    'libxrandr': ['custom:HPND'],
-    'libxrender': ['custom:HPND'],
-    'libxres': ['custom:X11'],
-    'libxslt': ['custom:X11'],
-    'libxss': ['custom:X11'],
-    'libxt': ['MIT', 'custom:HPND', 'custom:X11'],
-    'libxtst': ['MIT', 'custom:HPND', 'custom:X11'],
-    'libxv': ['custom:HPND'],
-    'libxxf86vm': ['custom:X11'],
-    'livecd-sounds': ['custom:CC0'],
-    'lolcat': ['BSD3'],
-    'l-smash': ['ISC'],
-    'lsof': ['custom:lsof'],
-    'mesa-demos': ['MIT', 'custom:SGI', 'LGPL'],
-    'mesa': ['MIT', 'custom:Khronos', 'custom:SGI'],
-    'mesa-vdpau': ['MIT', 'custom:Khronos', 'custom:SGI'],
-    'minizip': ['ZLIB'],
-    'mobile-broadband-provider-info': ['custom:Public Domain'],
-    'ntp': ['custom:HPND', 'BSD2'],
-    'nvidia-cg-toolkit': ['custom:non-free'],
-    'nvidia': ['custom:non-free'],
-    'nvidia-dkms': ['custom:non-free'],
-    'nvidia-utils': ['custom:non-free'],
-    'openjdk8-src': ['GPL2'],
-    'orc': ['BSD2', 'BSD3'],
-    'pepper-flash': ['custom:non-free'],
-    'perl-rename': ['GPL', 'PerlArtistic'],
-    'pigz': ['ZLIB'],
-    'pixman': ['MIT'],
-    'png++': ['BSD3'],
-    'popt': ['custom:X11'],
-    'python2': ['Python'],
-    'python-docutils': ['custom:publicdomain', 'BSD2', 'Python', 'GPL3'],
-    'python-magic': ['BSD2'],
-    'python-numpy': ['BSD3'],
-    'python': ['Python'],
-    'qhull': ['custom:Qhull'],
-    'rnnoise': ['BSD3'],
-    'rogue': ['BSD3'],
-    'rpcbind': ['BSD3'],
-    'sdl_image': ['zlib'],
-    'sound-theme-freedesktop': ['custom:CC-BY-SA', 'GPL2', 'custom:Creative Commons Attribution 3.0 Unported', 'GPL'],
-    'spirv-tools': ['Apache'],
-    'steam': ['custom:non-free'],
-    'sudo': ['ISC', 'BSD3', 'BSD2', 'ZLIB'],
-    'svt-av1': ['BSD-3-Clause'], # additionally 'Alliance for Open Media Patent License 1.0'
-    'tcl': ['custom:BSD-like'],
-    'tk': ['custom:BSD-like'],
-    'ttf-bitstream-vera': ['custom:bitstream-vera'],
-    'ttf-dejavu': ['custom:publicdomain', 'custom:bitstream-vera'],
-    'unrar': ['custom:non-free'],
-    'unshield': ['MIT'],
-    'unzip': ['custom:Info-ZIP'],
-    'vdpauinfo': ['MIT'],
-    'vulkan-icd-loader': ['Apache'],
-    'vulkan-mesa-layers': ['MIT', 'custom:Khronos', 'custom:SGI'],
-    'vulkan-radeon': ['MIT', 'custom:Khronos', 'custom:SGI'],
-    'vulkan-tools': ['Apache'],
-    'w3m': ['custom:w3m'],
-    'webkit2gtk': ['BSD', 'MIT', 'GPL2', 'GPL3', 'LGPL2', 'LGPL2.1', 'custom:Unicode-DFS'],
-    'webrtc-audio-processing': ['BSD3'],
-    'xcb-proto': ['custom:X11'],
-    'xcb-util': ['custom:X11'],
-    'xcb-util-image': ['custom:X11'],
-    'xcb-util-keysyms': ['custom:HPND', 'custom:X11'],
-    'xcb-util-renderutil': ['custom:HPND', 'custom:X11'],
-    'xcb-util-wm': ['custom:HPND', 'custom:X11'],
-    'xf86-input-libinput': ['custom:HPND'],
-    'xf86-video-amdgpu': ['custom:X11', 'MIT', 'custom:HPND'],
-    'xfce4-wavelan-plugin': ['BSD2'],
-    'xfce4-xkb-plugin': ['BSD2'],
-    'xkeyboard-config': ['MIT', 'custom:HPND', 'custom:X11', 'custom:MIT-style'],
-    'xcalib': ['GPL-2.0'], # additionally with optional postcardware
-    'xorg-bdftopcf': ['custom:X11'],
-    'xorg-fonts-encodings': ['custom:Public Domain'],
-    'xorg-font-util': ['custom:UCD', 'MIT', 'BSD2'],
-    'xorg-iceauth': ['custom:X11'],
-    'xorg-mkfontscale': ['MIT', 'custom:HPND', 'custom:X11'],
-    'xorgproto': ['MIT', 'custom:HPND', 'custom:X11'],
-    'xorg-server': ['BSD', 'MIT', 'custom:HPND', 'custom:X11'],
-    'xorg-server-common': ['BSD', 'MIT', 'custom:HPND', 'custom:X11'],
-    'xorg-setxkbmap': ['custom:HPND'],
-    'xorg-x11perf': ['custom:HPND'],
-    'xorg-xauth': ['custom:X11'],
-    'xorg-xdpyinfo': ['custom:X11'],
-    'xorg-xev': ['custom:X11'],
-    'xorg-xeyes': ['custom:X11'],
-    'xorg-xfontsel': ['custom:HPND', 'custom:X11'],
-    'xorg-xhost': ['MIT', 'custom:X11'],
-    'xorg-xinit': ['custom:X11'],
-    'xorg-xinput': ['MIT'],
-    'xorg-xkbcomp': ['custom:HPND', 'custom:X11'],
-    'xorg-xkbevd': ['custom:HPND'],
-    'xorg-xkbutils': ['custom:HPND', 'custom:X11-DEC', 'MIT'],
-    'xorg-xmessage': ['custom:X11'],
-    'xorg-xmodmap': ['MIT', 'custom:X11'],
-    'xorg-xprop': ['custom:HPND', 'custom:X11'],
-    'xorg-xrandr': ['custom:HPND'],
-    'xorg-xrdb': ['custom:X11'],
-    'xorg-xset': ['custom:X11'],
-    'xorg-xwayland': ['MIT'],
-    'youtube-dl': ['custom:Unlicense'],
-    'zathura-cb': ['zlib'],
-    'zathura-djvu': ['zlib'],
-    'zathura-pdf-mupdf': ['zlib'],
-    'zathura-pdf-poppler': ['zlib'],
-    'zathura-ps': ['zlib'],
-    'zathura': ['zlib'],
-    'zip': ['custom:Info-ZIP'],
-    'zlib': ['ZLIB'],
-    'zoom': ['custom:non-free'], # AUR
-    'zsh-abbr': ['custom:CC-BY-NC-SA-4.0', 'custom:Hippocratic'], # AUR
-    'zsh': ['custom:MIT-style', 'GPL'],
-    'zeroc-ice': ['GPL-2.0-only'], # alternatively non-free commercial license
-    'zeroc-ice-java': ['GPL-2.0-only'], # alternatively non-free commerical license
-}
+import json
+import os
+import re
+import sys
 
-class Package(object):
-    def __init__(self, name, licenses):
+src_dir = os.path.join(os.path.dirname(__file__), "..")
+src_dir = os.path.realpath(src_dir)
+
+def clean_license_name(license: str):
+    return re.sub(r"^(custom(:|=)|LicenseRef-)", "", license)
+
+def filter_license_name(license: str):
+    return re.sub(r"[_\-\s]", "", clean_license_name(license).lower())
+
+
+class Package:
+    def __init__(self, name, licenses, old_licenses=None):
         self.name = name
         self.licenses = licenses
+        self.old_licenses = old_licenses or licenses
 
-class UnambiguousDb(object):
-    def __init__(self, db):
+
+with open(os.path.join(src_dir, "ambiguous.json")) as f:
+    ambiguous = json.load(f)
+    ambiguous_free = list(map(filter_license_name, ambiguous["free"]))
+    ambiguous_unknown = list(map(filter_license_name, ambiguous["unknown"]))
+
+with open(os.path.join(src_dir, "vrms_licenses.tsv")) as f:
+    aliases = dict()
+    for line in f.read().splitlines():
+        if line and line[0] != '#':
+            names = line.split('\t')
+            for alias in names[1:]:
+                aliases[filter_license_name(alias)] = names[0]
+
+with open(os.path.join(src_dir, "fixed_packages.tsv")) as f:
+    fixed_packages = dict()
+    for line in f.read().splitlines():
+        if line and line[0] != '#':
+            (name, fixed_license, old_license) = line.split('\t')
+            old_license = old_license.split("  ")
+            fixed_packages[name] = Package(name, [fixed_license], old_license)
+
+
+class UnambiguousDb:
+    def __init__(self, db, allow_amibiguous_free=False, print_unknown=False):
         self.packages = []
+        self.unknown_packages = []
 
         for pkg in db.search(""):
-            if pkg.name in AMBIGUOUS_PACKAGES:
-                self.packages.append(Package(pkg.name, AMBIGUOUS_PACKAGES[pkg.name]))
-            elif pkg.name.startswith("lib32") and pkg.name[6:] in AMBIGUOUS_PACKAGES:
-                self.packages.append(Package(pkg.name, AMBIGUOUS_PACKAGES[pkg.name[6:]]))
-            else:
-                self.packages.append(Package(pkg.name, pkg.licenses))
+            fixed_pkg = fixed_packages.get(pkg.name)
+            if fixed_pkg:
+                if fixed_pkg.old_licenses == pkg.licenses:
+                    self.packages.append(fixed_pkg)
+                    continue
+                else:
+                    print(pkg.name, "- Warning: outdated license fix", file=sys.stderr)
+
+            licenses = list(map(clean_license_name, pkg.licenses))
+            has_unknown = any(map(lambda l: filter_license_name(l) in ambiguous_unknown, licenses))
+            if print_unknown and not has_unknown:
+                continue
+            elif not print_unknown and has_unknown:
+                continue
+
+            if allow_amibiguous_free:
+                licenses = filter(lambda l: filter_license_name(l) not in ambiguous_free, licenses)
+            licenses = list(map(lambda l: aliases.get(filter_license_name(l), l), licenses))
+
+            new_pkg = Package(pkg.name, licenses, pkg.licenses)
+            self.packages.append(new_pkg)

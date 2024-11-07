@@ -1,0 +1,5 @@
+# Package	# Fixed license (SPDX)	# Old license list
+libssh	LGPL-2.1-or-later	LGPL-2.1-or-late
+netpbm	Artistic-1.0 AND GPL-2.0-only AND LGPL-2.0-only AND MIT	Artistic-1.0  GPL-2.0-only  LGPL-2.0.only  MIT
+unzip	Info-ZIP	custom
+zsh-abbr	LicenseRef-Hippocratic-3.0 AND CC-BY-NC-SA-4.0	LicenseRef-custom

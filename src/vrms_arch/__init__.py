@@ -6,9 +6,6 @@ import os
 import os.path
 import pyalpm
 
-# DFSG/OSI-approved licenses, and the various variants in naming them
-# I see in my package database
-
 from .license_finder import LicenseFinder
 from .disambiguation import UnambiguousDb
 
@@ -24,6 +21,9 @@ def vrms():
     parser.add_argument("-u", "--list-unknowns",
                         action="store_true",
                         help="List packages of unknown license instead of non-free packages")
+    parser.add_argument("-v", "--verbose",
+                        action="store_true",
+                        help="Print additional information")
     parser.add_argument
 
     args = parser.parse_args()
@@ -44,7 +44,7 @@ def vrms():
 
     for db in dbs_to_visit:
         # print("Reading pacman DB: %s" % db.name, file=sys.stderr)
-        db = UnambiguousDb(db)
+        db = UnambiguousDb(db, allow_amibiguous_free=True)
         visitor.visit_db(db)
 
     if args.list_unknowns:

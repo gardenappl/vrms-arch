@@ -4,7 +4,7 @@ import sys
 
 from pyparsing import Word, Literal, alphanums, infix_notation, opAssoc, Opt, ParseException, CaselessLiteral
 
-from .license_cleaner import clean_license_name
+from .disambiguation import filter_license_name
 
 src_dir = os.path.join(os.path.dirname(__file__), "..")
 src_dir = os.path.realpath(src_dir)
@@ -12,12 +12,16 @@ src_dir = os.path.realpath(src_dir)
 with open(os.path.join(src_dir, "licenses.json")) as f:
     spdx_json = json.load(f)
     global SPDX_LICENSES, OSI_LICENSES, FSF_LICENSES, SPDX_VERSION, SPDX_DATE
+    global FILTERED_SPDX_LICENSES, FILTERED_OSI_LICENSES, FILTERED_FSF_LICENSES
     SPDX_VERSION = spdx_json["licenseListVersion"]
     SPDX_DATE = spdx_json["releaseDate"]
     SPDX_LICENSES = [license['licenseId'] for license in spdx_json['licenses']]
+    FILTERED_SPDX_LICENSES = list(map(filter_license_name, SPDX_LICENSES))
     OSI_LICENSES = [license['licenseId'] for license in spdx_json['licenses'] if license['isOsiApproved']]
+    FILTERED_OSI_LICENSES = list(map(filter_license_name, OSI_LICENSES))
     FSF_LICENSES = [license['licenseId'] for license in spdx_json['licenses'] 
                     if 'isFsfLibre' in license and license['isFsfLibre']]
+    FILTERED_FSF_LICENSES = list(map(filter_license_name, FSF_LICENSES))
 
 
 spdx_simple = ((Word(alphanums, alphanums + '-' + '.') + Opt(Literal('+')) +
@@ -37,8 +41,8 @@ class LicenseFinder(object):
         # all of the seen (clean) license names with their raw variants
         self.license_names = {}
 
-        # packages with "custom" license
-        self.unknown_packages = set()
+        # packages with a list of unknown licneses
+        self.unknown_packages = {}
 
         # packages with a known non-free license
         self.nonfree_packages = set()
@@ -53,32 +57,35 @@ class LicenseFinder(object):
             try_spdx = False
 
             # get a list of all licenses on the box
-            for license in pkg.licenses:
-                print("Clean", clean_license_name(license))
+            licenses = pkg.licenses
+            for license in licenses:
                 if " AND " in license.upper() or " OR " in license.upper() or " WITH " in license.upper():
                     try_spdx = True
                     break
 
-            licenses = pkg.licenses
+            is_spdx = False
             if try_spdx:
-                spdx_expression = " AND ".join(["({})".format(license) for license in pkg.licenses])
+                spdx_expression = " AND ".join(["({})".format(license) for license in licenses])
                 try:
                     licenses = spdx_complex.parse_string(spdx_expression, parseAll=True)
+                    is_spdx = True
 
                 except ParseException:
-                    print(pkg.name, "- Expected SPDX expression but was invalid:", spdx_expression, file=sys.stderr)
+                    print(pkg.name, "- Expected SPDX expression but was invalid:", licenses, file=sys.stderr)
 
-            # accepts list of licenses, possibly with 'AND', 'OR' and 'WITH' operators and sub-lists
-            # if no operators are present, assume AND
-            def check_license_list(licenses, free_criteria):
-                and_expression = True
+            # accepts list of licenses, with 'AND', 'OR' and 'WITH' operators and sub-lists
+            # returns list of unsatisfied licenses
+            def check_spdx_expression(licenses, free_criteria):
+                or_expression = False
 
                 with_clause = False
                 found_any_free = False
+                unfree_licenses = []
                 for item in licenses:
                     free = False
                     if not isinstance(item, str):
-                        free = check_license_list(item, free_criteria)
+                        unfree_licenses += check_spdx_expression(item, free_criteria)
+                        free = len(unfree_licenses) == 0
                     else:
                         item_upper = item.upper()
                         if item_upper == "AND" or with_clause:
@@ -87,23 +94,24 @@ class LicenseFinder(object):
                             with_clause = True
                             continue
                         elif item_upper == "OR":
-                            and_expression = False
+                            or_expression = True
                             continue
                         else:
                             free = free_criteria(item)
-                    if not free and and_expression:
-                        return False
-                    elif free:
+                        if not free:
+                            unfree_licenses.append(item) 
+                    if free:
                         found_any_free = True
-                return found_any_free
-            # print("Package:", pkg.name)
-            # print("Licenses:", licenses)
-            # print("Is OSI?", check_license_list(licenses, lambda item: item in OSI_LICENSES))
-            # print("Is FSF?", check_license_list(licenses, lambda item: item in FSF_LICENSES))
-            # print("Is SPDX?", check_license_list(licenses, lambda item: item in SPDX_LICENSES))
-            check_license_list(licenses, lambda item: item in OSI_LICENSES)
-            check_license_list(licenses, lambda item: item in FSF_LICENSES)
-            check_license_list(licenses, lambda item: item in SPDX_LICENSES)
+                return [] if (or_expression and found_any_free) else unfree_licenses
+
+            if is_spdx:
+                unfree_licenses = check_spdx_expression(licenses, lambda item: item in SPDX_LICENSES)
+            else:
+                unfree_licenses = list(filter(lambda l: filter_license_name(l) not in FILTERED_SPDX_LICENSES, licenses))
+
+            if len(unfree_licenses) > 0:
+                if is_spdx: print(pkg.name, "- not SPDX:", unfree_licenses)
+                self.unknown_packages[pkg.name] = unfree_licenses
 
 
     # Print all seen licenses in a convenient almost python list
@@ -124,10 +132,11 @@ class LicenseFinder(object):
             print("%s: %d" % (lic, len(self.by_license[lic])))
 
     def list_all_unknown_packages(self):
-        print("Packages of unknown license on this system: %d" % len(self.unknown_packages), file=sys.stderr)
+        print("Packages of unknown license on this system: %d" % len(self.unknown_packages.keys()), file=sys.stderr)
 
-        for upackage in sorted(self.unknown_packages, key=lambda pkg: pkg.name):
-            print("%s: %s" % (upackage.name, upackage.licenses))
+        sorted_packages = sorted(self.unknown_packages.keys())
+        for package in sorted_packages:
+            print("%s: %s" % (package, self.unknown_packages[package]))
 
     def list_all_nonfree_packages(self):
         for nfpackage in sorted(self.nonfree_packages, key=lambda pkg: pkg.name):

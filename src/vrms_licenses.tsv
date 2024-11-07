@@ -1,0 +1,15 @@
+# SPDX License ID	# Aliases...
+AGPL-2.0	AGPL2
+AGPL-3.0	AGPL3
+Apache-2.0 WITH LLVM-exception	Apache 2.0 with LLVM Exception
+BSD-2-Clause	BSD2
+BSD-3-Clause	BSD3
+CC0-1.0	CC0
+GPL-2.0	GPL2	GPL2.0
+GPL-3.0	GPL3	GPL3.0
+LGPL-2.0	LGPL2
+LGPL-2.1	LGPL2.1
+LGPL-3.0	LGPL3
+MPL-2.0	MPL2
+blessing	SQLite
+X11	MITX11

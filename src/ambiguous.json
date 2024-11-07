@@ -1,0 +1,19 @@
+{
+  "free": [
+    "Apache",
+    "BSD",
+    "BSD-like",
+    "GPL",
+    "LGPL",
+    "MIT-style",
+    "MPL",
+    "OFL",
+    "PerlArtistic",
+    "Public Domain",
+    "PSF",
+    "SIL"
+  ],
+  "unknown": [
+    "custom"
+  ]
+}
